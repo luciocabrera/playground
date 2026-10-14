@@ -1,0 +1,81 @@
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 12px;
+  list-style: none;
+  border: 1px dashed var(--line-strong);
+  border-radius: 16px;
+  background: rgba(255, 253, 249, 0.7);
+  min-height: 3.4rem;
+}
+
+.tags-empty {
+  color: var(--muted);
+  align-self: center;
+  padding: 0.2rem 0.35rem;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 0.28rem 0.4rem 0.28rem 0.75rem;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink);
+  border: 1px solid var(--line-strong);
+  line-height: 1.2;
+}
+
+.tag[data-tone="accent"] {
+  background: var(--pine-soft);
+  border-color: transparent;
+  color: var(--pine);
+}
+
+.tag[data-tone="amber"] {
+  background: var(--gold-soft);
+  border-color: transparent;
+  color: var(--gold);
+}
+
+.tag[data-tone="rose"] {
+  background: var(--oxide-soft);
+  border-color: transparent;
+  color: var(--oxide-ink);
+}
+
+.tag-label {
+  overflow-wrap: anywhere;
+}
+
+.tag-remove {
+  display: grid;
+  place-items: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.tag-remove:hover {
+  background: rgba(34, 30, 26, 0.08);
+}
+
+.tag-remove:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+
+.tag:not(:has(.tag-remove)) {
+  padding-right: 0.75rem;
+}
