@@ -2,12 +2,8 @@
  * Return a new array of `data` sorted by `keys`, in priority order.
  * The first key is compared first. Each later key is used only when the
  * earlier keys tie. Missing values sort last. The input array stays as it was.
- *
- * @param {Array<object>} data
- * @param {Array<string>} keys
- * @returns {Array<object>}
  */
-export function sortByKeys(data, keys) {
+export function sortByKeys<T extends object>(data: readonly T[], keys: readonly string[]): T[] {
   if (!Array.isArray(data)) {
     throw new TypeError("data must be an array");
   }
@@ -15,16 +11,22 @@ export function sortByKeys(data, keys) {
     throw new TypeError("keys must be an array");
   }
 
-  return [...data].sort((left, right) => {
-    for (const key of keys) {
-      const difference = compareValues(left?.[key], right?.[key]);
-      if (difference !== 0) return difference;
-    }
-    return 0;
-  });
+  return data.toSorted((left, right) => compareRows(left, right, keys));
 }
 
-function compareValues(left, right) {
+function compareRows(left: object, right: object, keys: readonly string[]): number {
+  for (const key of keys) {
+    const difference = compareValues(fieldOf(left, key), fieldOf(right, key));
+    if (difference !== 0) return difference;
+  }
+  return 0;
+}
+
+function fieldOf(row: object | null | undefined, key: string): unknown {
+  return (row as Record<string, unknown> | null | undefined)?.[key];
+}
+
+function compareValues(left: unknown, right: unknown): number {
   const leftMissing = left == null;
   const rightMissing = right == null;
   if (leftMissing && rightMissing) return 0;

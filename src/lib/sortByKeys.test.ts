@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { sortByKeys } from "./sortByKeys.js";
+import { sortByKeys } from "./sortByKeys.ts";
 
 test("sorts by keys in priority order", () => {
   const data = [
@@ -57,6 +57,6 @@ test("does not reorder the input array", () => {
 });
 
 test("rejects values that are not arrays", () => {
-  assert.throws(() => sortByKeys(null, []), TypeError);
-  assert.throws(() => sortByKeys([], "name"), TypeError);
+  assert.throws(() => sortByKeys(null as never, []), TypeError);
+  assert.throws(() => sortByKeys([], "name" as never), TypeError);
 });

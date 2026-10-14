@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { sortByValue } from "./sortByValue.js";
+import { sortByValue } from "./sortByValue.ts";
 
 const swatches = [
   { name: "Lemon", color: "yellow" },
@@ -95,8 +95,8 @@ test("does not reorder the input array", () => {
 });
 
 test("rejects a bad data array, value list, or key", () => {
-  assert.throws(() => sortByValue(null, [], "color"), TypeError);
-  assert.throws(() => sortByValue([], "white", "color"), TypeError);
+  assert.throws(() => sortByValue(null as never, [], "color"), TypeError);
+  assert.throws(() => sortByValue([], "white" as never, "color"), TypeError);
   assert.throws(() => sortByValue([], [], ""), TypeError);
-  assert.throws(() => sortByValue([], [], 1), TypeError);
+  assert.throws(() => sortByValue([], [], 1 as never), TypeError);
 });

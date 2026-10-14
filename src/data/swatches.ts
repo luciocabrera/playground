@@ -1,4 +1,9 @@
-export const swatches = [
+export type Swatch = {
+  name: string;
+  color: string;
+};
+
+export const swatches: Swatch[] = [
   { name: "Lemon", color: "yellow" },
   { name: "Ink", color: "black" },
   { name: "Snow", color: "white" },
@@ -10,6 +15,6 @@ export const swatches = [
   { name: "Lime", color: "green" },
 ];
 
-export const colorChoices = ["white", "black", "green", "yellow", "red", "blue", "others"];
+export const colorChoices = ["white", "black", "green", "yellow", "red", "blue", "others"] as const;
 
 export const defaultColorOrder = ["white", "black", "green", "yellow", "others"];

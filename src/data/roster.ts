@@ -1,4 +1,11 @@
-export const roster = [
+export type Person = {
+  name: string;
+  role: string;
+  team: string;
+  city: string;
+};
+
+export const roster: Person[] = [
   { name: "Ada", role: "Engineer", team: "Platform", city: "Lisbon" },
   { name: "Kenji", role: "Designer", team: "Platform", city: "Osaka" },
   { name: "Noor", role: "Engineer", team: "Product", city: "Amman" },
@@ -9,4 +16,5 @@ export const roster = [
   { name: "Priya", role: "Engineer", team: "Product", city: "Amman" },
 ];
 
-export const rosterKeys = ["name", "role", "team", "city"];
+export const rosterKeys = ["name", "role", "team", "city"] as const;
+export type RosterKey = (typeof rosterKeys)[number];

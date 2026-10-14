@@ -1,9 +1,31 @@
-import { createContext, useContext, useId, useState } from "react";
+import { createContext, useContext, useId, useState, type ReactNode } from "react";
 import "./Accordion.css";
 
-const AccordionContext = createContext(null);
+type AccordionProps = {
+  children?: ReactNode;
+  multiple?: boolean;
+  defaultOpen?: Iterable<string>;
+};
 
-function useAccordion() {
+type AccordionItemProps = {
+  id?: string;
+  title: string;
+  children?: ReactNode;
+};
+
+type AccordionComponent = {
+  (props: AccordionProps): ReactNode;
+  Item: (props: AccordionItemProps) => ReactNode;
+};
+
+type AccordionContextValue = {
+  openIds: ReadonlySet<string>;
+  toggle: (id: string) => void;
+};
+
+const AccordionContext = createContext<AccordionContextValue | null>(null);
+
+function useAccordion(): AccordionContextValue {
   const context = useContext(AccordionContext);
   if (!context) {
     throw new Error("Accordion.Item must render inside Accordion.");
@@ -11,29 +33,22 @@ function useAccordion() {
   return context;
 }
 
-export function Accordion({ children, multiple = false, defaultOpen = [] }) {
+export const Accordion: AccordionComponent = function Accordion({
+  children,
+  multiple = false,
+  defaultOpen = [],
+}) {
   const [openIds, setOpenIds] = useState(() => new Set(defaultOpen));
   const [prevMultiple, setPrevMultiple] = useState(multiple);
 
   // Keep a single open panel when the parent switches multiple off.
   if (multiple !== prevMultiple) {
     setPrevMultiple(multiple);
-    if (!multiple && openIds.size > 1) {
-      const first = openIds.values().next().value;
-      setOpenIds(new Set([first]));
-    }
+    if (!multiple) setOpenIds(singleOpenId);
   }
 
-  function toggle(id) {
-    setOpenIds((current) => {
-      const next = new Set(multiple ? current : []);
-      if (current.has(id)) {
-        next.delete(id);
-        return next;
-      }
-      next.add(id);
-      return next;
-    });
+  function toggle(id: string) {
+    setOpenIds((current) => toggledOpenIds(current, id, multiple));
   }
 
   return (
@@ -41,9 +56,9 @@ export function Accordion({ children, multiple = false, defaultOpen = [] }) {
       <div className="accordion">{children}</div>
     </AccordionContext.Provider>
   );
-}
+};
 
-function AccordionItem({ id, title, children }) {
+function AccordionItem({ id, title, children }: AccordionItemProps): ReactNode {
   const reactId = useId();
   const itemId = id ?? reactId;
   const { openIds, toggle } = useAccordion();
@@ -80,3 +95,16 @@ function AccordionItem({ id, title, children }) {
 }
 
 Accordion.Item = AccordionItem;
+
+function toggledOpenIds(openIds: ReadonlySet<string>, id: string, multiple: boolean): Set<string> {
+  if (!openIds.has(id)) return new Set(multiple ? [...openIds, id] : [id]);
+  if (!multiple) return new Set();
+  return new Set([...openIds].filter((openId) => openId !== id));
+}
+
+function singleOpenId(openIds: Set<string>): Set<string> {
+  if (openIds.size <= 1) return openIds;
+  const first = [...openIds][0];
+  if (first === undefined) return openIds;
+  return new Set([first]);
+}

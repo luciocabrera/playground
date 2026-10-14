@@ -1,15 +1,20 @@
-import { useState } from "react";
-import { Accordion } from "./components/Accordion.jsx";
-import { Tags } from "./components/Tags.jsx";
-import { roster, rosterKeys } from "./data/roster.js";
-import { colorChoices, defaultColorOrder, swatches } from "./data/swatches.js";
-import { sortByKeys } from "./lib/sortByKeys.js";
-import { OTHERS, sortByValue } from "./lib/sortByValue.js";
+import { useState, type FormEvent, type ReactNode } from "react";
+import { Accordion } from "./components/Accordion.tsx";
+import { Tags } from "./components/Tags.tsx";
+import { roster, rosterKeys, type Person, type RosterKey } from "./data/roster.ts";
+import { colorChoices, defaultColorOrder, swatches, type Swatch } from "./data/swatches.ts";
+import { sortByKeys } from "./lib/sortByKeys.ts";
+import { OTHERS, sortByValue } from "./lib/sortByValue.ts";
 import "./App.css";
 
-const tones = ["neutral", "accent", "amber", "rose"];
+const tones = ["neutral", "accent", "amber", "rose"] as const;
 
-const startingTags = [
+type DemoTag = {
+  label: string;
+  tone: (typeof tones)[number];
+};
+
+const startingTags: DemoTag[] = [
   { label: "React", tone: "accent" },
   { label: "Vite", tone: "neutral" },
   { label: "Accordion", tone: "amber" },
@@ -36,7 +41,17 @@ export default function App() {
   );
 }
 
-function Section({ index, title, signature, children }) {
+function Section({
+  index,
+  title,
+  signature,
+  children,
+}: {
+  index: string;
+  title: string;
+  signature: string;
+  children: ReactNode;
+}) {
   const headingId = `section-${index}`;
 
   return (
@@ -105,7 +120,7 @@ function TagsDemo() {
   const [draft, setDraft] = useState("");
   const [message, setMessage] = useState("");
 
-  function addTag(event) {
+  function addTag(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const label = draft.trim();
     if (!label) {
@@ -118,13 +133,13 @@ function TagsDemo() {
     }
     setTags((current) => [
       ...current,
-      { label, tone: tones[current.length % tones.length] },
+      { label, tone: tones[current.length % tones.length] ?? "neutral" },
     ]);
     setDraft("");
     setMessage("");
   }
 
-  function removeTag(label) {
+  function removeTag(label: string) {
     setTags((current) => current.filter((tag) => tag.label !== label));
     setMessage(`Removed ${label}.`);
   }
@@ -180,27 +195,16 @@ function TagsDemo() {
 }
 
 function SortDemo() {
-  const [keys, setKeys] = useState(["team", "role"]);
+  const [keys, setKeys] = useState<readonly RosterKey[]>(["team", "role"]);
   const sorted = sortByKeys(roster, keys);
   const keyList = keys.map((key) => `"${key}"`).join(", ");
 
-  function toggleKey(key) {
-    setKeys((current) =>
-      current.includes(key)
-        ? current.filter((item) => item !== key)
-        : [...current, key],
-    );
+  function toggleKey(key: RosterKey) {
+    setKeys((current) => toggledItem(current, key));
   }
 
-  function moveKey(index, direction) {
-    setKeys((current) => {
-      const target = index + direction;
-      if (target < 0 || target >= current.length) return current;
-      const next = current.slice();
-      const [moved] = next.splice(index, 1);
-      next.splice(target, 0, moved);
-      return next;
-    });
+  function moveKey(index: number, direction: number) {
+    setKeys((current) => moveItem(current, index, direction));
   }
 
   return (
@@ -272,7 +276,7 @@ function SortDemo() {
   );
 }
 
-function describeKeys(keys) {
+function describeKeys(keys: readonly string[]): string {
   if (keys.length === 0) {
     return "No keys are selected, so both tables match.";
   }
@@ -283,12 +287,26 @@ function describeKeys(keys) {
   return `Sorted by ${first}, then ${rest.join(", then ")}. The number on a column is its priority.`;
 }
 
-function RosterTable({ caption, rows, keys }) {
-  function rankOf(column) {
-    const index = keys.indexOf(column);
-    return index === -1 ? undefined : index + 1;
-  }
+function rankOf(keys: readonly RosterKey[], column: RosterKey): number | undefined {
+  const index = keys.indexOf(column);
+  return index === -1 ? undefined : index + 1;
+}
 
+function ariaSortFor(rank: number | undefined): "none" | "ascending" | "other" {
+  if (rank === 1) return "ascending";
+  if (rank) return "other";
+  return "none";
+}
+
+function RosterTable({
+  caption,
+  rows,
+  keys,
+}: {
+  caption: string;
+  rows: readonly Person[];
+  keys: readonly RosterKey[];
+}) {
   return (
     <div className="table-wrap">
       <table>
@@ -296,12 +314,9 @@ function RosterTable({ caption, rows, keys }) {
         <thead>
           <tr>
             {rosterKeys.map((column) => {
-              const rank = rankOf(column);
-              let ariaSort = "none";
-              if (rank === 1) ariaSort = "ascending";
-              else if (rank) ariaSort = "other";
+              const rank = rankOf(keys, column);
               return (
-                <th key={column} scope="col" data-rank={rank} aria-sort={ariaSort}>
+                <th key={column} scope="col" data-rank={rank} aria-sort={ariaSortFor(rank)}>
                   {column}
                   {rank ? <span className="col-rank">{rank}</span> : null}
                 </th>
@@ -313,7 +328,7 @@ function RosterTable({ caption, rows, keys }) {
           {rows.map((row) => (
             <tr key={row.name}>
               {rosterKeys.map((column) => (
-                <td key={column} data-rank={rankOf(column)}>
+                <td key={column} data-rank={rankOf(keys, column)}>
                   {row[column]}
                 </td>
               ))}
@@ -326,33 +341,17 @@ function RosterTable({ caption, rows, keys }) {
 }
 
 function ValueSortDemo() {
-  const [values, setValues] = useState(defaultColorOrder);
+  const [values, setValues] = useState<readonly string[]>(defaultColorOrder);
   const sorted = sortByValue(swatches, values, "color");
   const valueList = values.map((value) => `"${value}"`).join(", ");
   const listed = new Set(values.filter((value) => value !== OTHERS));
 
-  function toggleValue(value) {
-    setValues((current) => {
-      if (current.includes(value)) return current.filter((item) => item !== value);
-      const othersAt = current.indexOf(OTHERS);
-      if (value !== OTHERS && othersAt !== -1) {
-        const next = current.slice();
-        next.splice(othersAt, 0, value);
-        return next;
-      }
-      return [...current, value];
-    });
+  function toggleValue(value: string) {
+    setValues((current) => toggledColor(current, value));
   }
 
-  function moveValue(index, direction) {
-    setValues((current) => {
-      const target = index + direction;
-      if (target < 0 || target >= current.length) return current;
-      const next = current.slice();
-      const [moved] = next.splice(index, 1);
-      next.splice(target, 0, moved);
-      return next;
-    });
+  function moveValue(index: number, direction: number) {
+    setValues((current) => moveItem(current, index, direction));
   }
 
   return (
@@ -424,27 +423,57 @@ function ValueSortDemo() {
   );
 }
 
-function describeValues(values) {
+function describeValues(values: readonly string[]): string {
   if (values.length === 0) {
     return "The value list is empty, so both tables match.";
   }
-  const listed = values.filter((value) => value !== OTHERS);
-  const rest = [];
-  for (const row of swatches) {
-    if (listed.includes(row.color) || rest.includes(row.color)) continue;
-    rest.push(row.color);
-  }
-  const parts = values.map((value) => {
-    if (value !== OTHERS) return value;
-    return rest.length === 0 ? "others" : `others (${rest.join(", ")})`;
-  });
+  const named = new Set(values.filter((value) => value !== OTHERS));
+  const rest = [
+    ...new Set(swatches.map((row) => row.color).filter((color) => !named.has(color))),
+  ];
+  const parts = values.map((value) => (value === OTHERS ? othersLabel(rest) : value));
   if (!values.includes(OTHERS) && rest.length > 0) {
     return `Order: ${parts.join(", then ")}. Anything else follows the list: ${rest.join(", ")}.`;
   }
   return `Order: ${parts.join(", then ")}.`;
 }
 
-function SwatchTable({ caption, rows, listed, markOthers = false }) {
+function othersLabel(rest: readonly string[]): string {
+  if (rest.length === 0) return "others";
+  return `others (${rest.join(", ")})`;
+}
+
+function toggledItem<T>(items: readonly T[], item: T): readonly T[] {
+  if (items.includes(item)) return items.filter((current) => current !== item);
+  return [...items, item];
+}
+
+function toggledColor(values: readonly string[], value: string): readonly string[] {
+  if (values.includes(value)) return values.filter((item) => item !== value);
+  const othersAt = values.indexOf(OTHERS);
+  if (value !== OTHERS && othersAt !== -1) return values.toSpliced(othersAt, 0, value);
+  return [...values, value];
+}
+
+function moveItem<T>(items: readonly T[], index: number, direction: number): readonly T[] {
+  const target = index + direction;
+  if (target < 0 || target >= items.length) return items;
+  const moved = items[index];
+  if (moved === undefined) return items;
+  return items.toSpliced(index, 1).toSpliced(target, 0, moved);
+}
+
+function SwatchTable({
+  caption,
+  rows,
+  listed,
+  markOthers = false,
+}: {
+  caption: string;
+  rows: readonly Swatch[];
+  listed: ReadonlySet<string>;
+  markOthers?: boolean;
+}) {
   return (
     <div className="table-wrap">
       <table>
@@ -477,6 +506,6 @@ function SwatchTable({ caption, rows, listed, markOthers = false }) {
   );
 }
 
-function ColorDot({ color }) {
+function ColorDot({ color }: { color: string }) {
   return <span className="color-dot" data-color={color} aria-hidden="true" />;
 }
