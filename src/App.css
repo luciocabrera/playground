@@ -66,6 +66,15 @@
   letter-spacing: -0.03em;
 }
 
+.section .MuiAccordion-heading,
+.section .MuiCardHeader-title {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  font-weight: 560;
+  letter-spacing: -0.02em;
+}
+
 .signature {
   display: inline-block;
   max-width: 100%;

@@ -1,10 +1,14 @@
 import { useState, type FormEvent, type ReactNode } from "react";
+import { ThemeProvider } from "@mui/material/styles";
 import { Accordion } from "./components/Accordion.tsx";
+import { MaterialAccordion } from "./components/MaterialAccordion.tsx";
+import { MaterialCardAccordion } from "./components/MaterialCardAccordion.tsx";
 import { Tags } from "./components/Tags.tsx";
 import { roster, rosterKeys, type Person, type RosterKey } from "./data/roster.ts";
 import { colorChoices, defaultColorOrder, swatches, type Swatch } from "./data/swatches.ts";
 import { sortByKeys } from "./lib/sortByKeys.ts";
 import { OTHERS, sortByValue } from "./lib/sortByValue.ts";
+import { playgroundTheme } from "./theme.ts";
 import "./App.css";
 
 const tones = ["neutral", "accent", "amber", "rose"] as const;
@@ -27,12 +31,16 @@ export default function App() {
         <p className="eyebrow">Vite + React</p>
         <h1>playground</h1>
         <p className="lede">
-          An accordion, a tags container with its children, and two sorts: one by
-          field names, one by a fixed list of values.
+          A custom accordion, the same idea in Material UI, a tags container, and
+          two sorts: one by field names, one by a fixed list of values.
         </p>
       </header>
       <main>
         <AccordionDemo />
+        <ThemeProvider theme={playgroundTheme}>
+          <MaterialAccordionDemo />
+          <MaterialCardDemo />
+        </ThemeProvider>
         <TagsDemo />
         <SortDemo />
         <ValueSortDemo />
@@ -115,6 +123,30 @@ function AccordionDemo() {
   );
 }
 
+function MaterialAccordionDemo() {
+  return (
+    <Section
+      index="02"
+      title="Material UI Accordion"
+      signature="<Accordion><AccordionSummary /></Accordion>"
+    >
+      <MaterialAccordion />
+    </Section>
+  );
+}
+
+function MaterialCardDemo() {
+  return (
+    <Section
+      index="03"
+      title="Material UI Card"
+      signature="<Card><CardActions><Button /></CardActions></Card>"
+    >
+      <MaterialCardAccordion />
+    </Section>
+  );
+}
+
 function TagsDemo() {
   const [tags, setTags] = useState(startingTags);
   const [draft, setDraft] = useState("");
@@ -145,7 +177,7 @@ function TagsDemo() {
   }
 
   return (
-    <Section index="02" title="Tags" signature="<Tags><Tags.Item /></Tags>">
+    <Section index="04" title="Tags" signature="<Tags><Tags.Item /></Tags>">
       <p className="intro">
         Tags is the container. Tags.Item is the child. The container lays the
         children out and passes remove down to each one.
@@ -208,7 +240,7 @@ function SortDemo() {
   }
 
   return (
-    <Section index="03" title="sortByKeys" signature="sortByKeys(data, keys)">
+    <Section index="05" title="sortByKeys" signature="sortByKeys(data, keys)">
       <p className="intro">
         The function takes the rows and a list of field names. It compares the
         first key, then uses each following key only when the values tie.
@@ -355,7 +387,7 @@ function ValueSortDemo() {
   }
 
   return (
-    <Section index="04" title="sortByValue" signature="sortByValue(data, values, key)">
+    <Section index="06" title="sortByValue" signature="sortByValue(data, values, key)">
       <p className="intro">
         The function takes the rows and a list of values for one field. Rows
         follow that list. <code>others</code> is the slot for any value the

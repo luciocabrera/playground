@@ -1,8 +1,10 @@
 # playground
 
-A small Vite + React page with four pieces:
+A small Vite + React page:
 
 - `Accordion` / `Accordion.Item` — the container keeps which panels are open
+- Material UI `Accordion` — the same open-set idea, drawn with AccordionSummary and AccordionDetails
+- Material UI `Card` — each card expands and collapses from a button in CardActions
 - `Tags` / `Tags.Item` — a container and the tag children inside it
 - `sortByKeys(data, keys)` — returns a new array sorted by that key list
 - `sortByValue(data, values, key)` — orders one field by a list you write. See [sortByValue](#sortbyvalue) below
