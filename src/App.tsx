@@ -3,6 +3,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import { Accordion } from "./components/Accordion.tsx";
 import { MaterialAccordion } from "./components/MaterialAccordion.tsx";
 import { MaterialCardAccordion } from "./components/MaterialCardAccordion.tsx";
+import { MaterialCardFadeAccordion } from "./components/MaterialCardFadeAccordion.tsx";
 import { Tags } from "./components/Tags.tsx";
 import { roster, rosterKeys, type Person, type RosterKey } from "./data/roster.ts";
 import { colorChoices, defaultColorOrder, swatches, type Swatch } from "./data/swatches.ts";
@@ -31,8 +32,9 @@ export default function App() {
         <p className="eyebrow">Vite + React</p>
         <h1>playground</h1>
         <p className="lede">
-          A custom accordion, the same idea in Material UI, a tags container, and
-          two sorts: one by field names, one by a fixed list of values.
+          A custom accordion, the same idea in Material UI, a card that fades when
+          it is collapsed, a tags container, and two sorts: one by field names,
+          one by a fixed list of values.
         </p>
       </header>
       <main>
@@ -40,6 +42,7 @@ export default function App() {
         <ThemeProvider theme={playgroundTheme}>
           <MaterialAccordionDemo />
           <MaterialCardDemo />
+          <MaterialCardFadeDemo />
         </ThemeProvider>
         <TagsDemo />
         <SortDemo />
@@ -147,6 +150,18 @@ function MaterialCardDemo() {
   );
 }
 
+function MaterialCardFadeDemo() {
+  return (
+    <Section
+      index="04"
+      title="Material UI Card fade"
+      signature="<Card data-collapsed><CardContent /></Card>"
+    >
+      <MaterialCardFadeAccordion />
+    </Section>
+  );
+}
+
 function TagsDemo() {
   const [tags, setTags] = useState(startingTags);
   const [draft, setDraft] = useState("");
@@ -177,7 +192,7 @@ function TagsDemo() {
   }
 
   return (
-    <Section index="04" title="Tags" signature="<Tags><Tags.Item /></Tags>">
+    <Section index="05" title="Tags" signature="<Tags><Tags.Item /></Tags>">
       <p className="intro">
         Tags is the container. Tags.Item is the child. The container lays the
         children out and passes remove down to each one.
@@ -240,7 +255,7 @@ function SortDemo() {
   }
 
   return (
-    <Section index="05" title="sortByKeys" signature="sortByKeys(data, keys)">
+    <Section index="06" title="sortByKeys" signature="sortByKeys(data, keys)">
       <p className="intro">
         The function takes the rows and a list of field names. It compares the
         first key, then uses each following key only when the values tie.
@@ -387,7 +402,7 @@ function ValueSortDemo() {
   }
 
   return (
-    <Section index="06" title="sortByValue" signature="sortByValue(data, values, key)">
+    <Section index="07" title="sortByValue" signature="sortByValue(data, values, key)">
       <p className="intro">
         The function takes the rows and a list of values for one field. Rows
         follow that list. <code>others</code> is the slot for any value the

@@ -1,0 +1,46 @@
+.fade-card-shell {
+  position: relative;
+}
+
+/* Height animates between the teaser and the body's real height.
+   `auto` only interpolates where interpolate-size is supported; elsewhere
+   the height snaps, which is also what reduced motion asks for. */
+.fade-card-clip {
+  --fade-collapsed: 152px;
+  overflow: hidden;
+}
+
+.fade-card-clip[data-collapsed="true"] {
+  height: var(--fade-collapsed);
+  -webkit-mask-image: linear-gradient(to bottom, #000 60%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 60%, transparent 100%);
+}
+
+@supports (interpolate-size: allow-keywords) {
+  .fade-card-clip {
+    interpolate-size: allow-keywords;
+    height: auto;
+    transition: height 220ms ease;
+  }
+}
+
+/* The blur is a sibling of the masked clip. A mask on the clip would
+   fade this strip out along with the text. */
+.fade-card-blur {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 40%;
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000);
+  mask-image: linear-gradient(to bottom, transparent, #000);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-card-clip {
+    transition: none;
+  }
+}
